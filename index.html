@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live News Ticker</title>
+  <style>
+    body {
+      margin: 0;
+      background: transparent;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    #ticker {
+      position: absolute;
+      bottom: 10px;       /* Change to 'top: 10px;' if desired */
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 4px 0;
+    }
+
+    #ticker span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scroll 30s linear infinite;
+    }
+
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+  </style>
+</head>
+<body>
+  <div id="ticker"><span>Loading news...</span></div>
+
+  <script>
+    const ticker = document.getElementById('ticker');
+
+    async function fetchNews() {
+      try {
+        const timestamp = new Date().getTime(); // cache-busting
+        const response = await fetch(
+          `https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en&t=${timestamp}`
+        );
+        const data = await response.json();
+        const headlines = data.items.map(item => item.title);
+        ticker.innerHTML = `<span>${headlines.join(' • ')}</span>`;
+      } catch (error) {
+        ticker.innerHTML = '<span>Error loading news</span>';
+      }
+    }
+
+    fetchNews();
+    setInterval(fetchNews, 60000); // Refresh every minute
+  </script>
+</body>
+</html>
